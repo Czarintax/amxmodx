@@ -471,7 +471,7 @@ public client_disconnected(id)
 
 public client_death(killer, victim, wpnindex, hitplace, TK)
 {
-	if (wpnindex == CSW_C4)
+	if (wpnindex == CSW_C4 || !is_user_connected(victim))
 		return
 
 	new headshot = (hitplace == HIT_HEAD) ? 1 : 0
@@ -788,6 +788,9 @@ public showStatus(id)
 		get_user_name(pid, name, charsmax(name))
 		new color1 = 0, color2 = 0
 	
+		if(!is_user_connected(pid))
+			return
+		
 		if (cs_get_user_team(pid) == CS_TEAM_T)
 			color1 = 255
 		else
