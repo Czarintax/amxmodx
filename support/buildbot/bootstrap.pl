@@ -9,6 +9,8 @@ use File::Path;
 my ($myself, $path) = fileparse($0);
 chdir($path);
 
+use FindBin;
+use lib $FindBin::Bin;
 require 'helpers.pm';
 
 #Go back above build dir
@@ -29,12 +31,12 @@ $argn = $#ARGV + 1;
 print "Attempting to reconfigure...\n";
 my $conf_args = '--enable-optimize --no-color --symbol-files';
 if ($argn > 0 && $^O !~ /MSWin/) {
-	$result = `CC=$ARGV[0] CXX=$ARGV[0] python ../build/configure.py $conf_args`;
+	$result = `CC=$ARGV[0] CXX=$ARGV[0] python3 ../build/configure.py $conf_args`;
 } else {
 	if ($^O =~ /MSWin/) {
 		$result = `C:\\Python38\\Python.exe ..\\build\\configure.py $conf_args`;
 	} else {
-		$result = `CC=clang CXX=clang python ../build/configure.py $conf_args`;
+		$result = `CC=clang CXX=clang python3 ../build/configure.py $conf_args`;
 	}
 }
 print "$result\n";

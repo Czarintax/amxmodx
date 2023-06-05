@@ -94,14 +94,14 @@ void CPlayer::restartStats(bool all)
 {
 	if ( all )
 	{
-		memset(weapons,0,sizeof(weapons));
+		memset(&weapons,0,sizeof(weapons));
 		memset(static_cast<void *>(&round),0,sizeof(round));
-		memset(weaponsRnd,0,sizeof(weaponsRnd));
+		memset(&weaponsRnd,0,sizeof(weaponsRnd));
 	}
 
-	memset(weaponsLife,0,sizeof(weaponsLife));   //DEC-Weapon (Round) stats
-	memset(attackers,0,sizeof(attackers));
-	memset(victims,0,sizeof(victims));
+	memset(&weaponsLife,0,sizeof(weaponsLife));   //DEC-Weapon (Round) stats
+	memset(&attackers,0,sizeof(attackers));
+	memset(&victims,0,sizeof(victims));
 	life = {};
 }
 
@@ -434,7 +434,7 @@ void CPlayer::WeaponsCheck(int weapons)
 	int old;
 	int cur;
 
-	for(int i = 1; i < MAX_WEAPONS; ++i)
+	for(int i = 1; i < DODMAX_WEAPONS; ++i)
 	{
 		// Check to see we are not talking about a grenade and we have changed
 		if(i != 13 && i != 14 && i != 15 && i != 16 && i != 36)
