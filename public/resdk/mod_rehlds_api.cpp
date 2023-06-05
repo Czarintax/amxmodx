@@ -9,6 +9,9 @@ IRehldsServerStatic* RehldsSvs;
 
 bool RehldsApi_Init()
 {
+	return false;
+	
+	/*
 	if (!IS_DEDICATED_SERVER())
 	{
 		return false;
@@ -39,4 +42,5 @@ bool RehldsApi_Init()
 	RehldsSvs        = RehldsApi->GetServerStatic();
 
 	return true;
+	*/
 }
