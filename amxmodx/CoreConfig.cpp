@@ -140,11 +140,11 @@ bool CoreConfig::ExecuteAutoConfig(CPluginMngr::CPlugin *plugin, AutoConfig *con
 
 	if (config->folder.length())
 	{
-		ke::SafeSprintf(file, sizeof(file), "%s%s/%s/%s.cfg", configsDir, AutoConfigDir, config->folder.chars(), config->autocfg.chars());
+		ke::SafeSprintf(file, sizeof(file), "%s/%s%s/%s/%s.cfg", g_mod_name.chars(), configsDir, AutoConfigDir, config->folder.chars(), config->autocfg.chars());
 	}
 	else
 	{
-		ke::SafeSprintf(file, sizeof(file), "%s%s/%s.cfg", configsDir, AutoConfigDir, config->autocfg.chars());
+		ke::SafeSprintf(file, sizeof(file), "%s/%s%s/%s.cfg", g_mod_name.chars(), configsDir, AutoConfigDir, config->autocfg.chars());
 	}
 
 	bool file_exists = g_LibSys.IsPathFile(file);
@@ -243,6 +243,15 @@ bool CoreConfig::ExecuteAutoConfig(CPluginMngr::CPlugin *plugin, AutoConfig *con
 
 	if (file_exists)
 	{
+		if (config->folder.length())
+	{
+		ke::SafeSprintf(file, sizeof(file), "%s%s/%s/%s.cfg", configsDir, AutoConfigDir, config->folder.chars(), config->autocfg.chars());
+	}
+	else
+	{
+		ke::SafeSprintf(file, sizeof(file), "%s%s/%s.cfg", configsDir, AutoConfigDir, config->autocfg.chars());
+	}
+		
 		char command[PLATFORM_MAX_PATH + sizeof(CommandFormat)];
 		ke::SafeSprintf(command, sizeof(command), CommandFormat, file);
 
@@ -266,20 +275,23 @@ void CoreConfig::ExecuteMapConfig()
 
 	if ((mapPrefix = strtok(mapName, "_")))
 	{
-		ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s%s/prefix_%s.cfg", configsDir, MapConfigDir, mapPrefix);
+		ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s/%s%s/prefix_%s.cfg", g_mod_name.chars(), configsDir, MapConfigDir, mapPrefix);
+		
 
 		if (g_LibSys.IsPathFile(cfgPath))
 		{
+			ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s%s/prefix_%s.cfg", configsDir, MapConfigDir, mapPrefix);
 			ke::SafeSprintf(command, sizeof(command), CommandFormat, cfgPath);
 			SERVER_COMMAND(command);
 		}
 	}
 
 	strncopy(mapName, STRING(gpGlobals->mapname), sizeof(mapName));
-	ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s%s/%s.cfg", configsDir, MapConfigDir, mapName);
+	ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s/%s%s/%s.cfg", g_mod_name.chars(), configsDir, MapConfigDir, mapName);
 
 	if (g_LibSys.IsPathFile(cfgPath))
 	{
+		ke::SafeSprintf(cfgPath, sizeof(cfgPath), "%s%s/%s.cfg", configsDir, MapConfigDir, mapName);
 		ke::SafeSprintf(command, sizeof(command), CommandFormat, cfgPath);
 		SERVER_COMMAND(command);
 	}
