@@ -477,7 +477,7 @@ const char *Menu::GetTextString(int player, page_t page, int &keys)
 		} else {
 			if (m_AutoColors)
 			{
-				ke::SafeSprintf(buffer, sizeof(buffer), "\\d%d. %s\n\\w", option_display, pItem->name.chars());
+				ke::SafeSprintf(buffer, sizeof(buffer), "^0%d. %s\n\\w", option_display, pItem->name.chars());
 			} else {
 				ke::SafeSprintf(buffer, sizeof(buffer), "#. %s\n", pItem->name.chars());
 			}
@@ -540,7 +540,7 @@ const char *Menu::GetTextString(int player, page_t page, int &keys)
 				{
 					ke::SafeSprintf(buffer,
 						sizeof(buffer),
-						"\\d%d. %s\n\\w",
+						"^0%d. %s\n\\w",
 						option == 10 ? 0 : option,
 						m_OptNames[abs(MENU_BACK)].chars());
 				} else {
@@ -573,7 +573,7 @@ const char *Menu::GetTextString(int player, page_t page, int &keys)
 				{
 					ke::SafeSprintf(buffer,
 						sizeof(buffer),
-						"\\d%d. %s\n\\w",
+						"^0%d. %s\n\\w",
 						option == 10 ? 0 : option,
 						m_OptNames[abs(MENU_MORE)].chars());
 				} else {
