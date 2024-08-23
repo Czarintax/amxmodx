@@ -9,18 +9,15 @@ IRehldsServerStatic* RehldsSvs;
 
 bool RehldsApi_Init()
 {
-	return false;
-	
-	/*
 	if (!IS_DEDICATED_SERVER())
 	{
 		return false;
 	}
 
 #if defined(PLATFORM_WINDOWS)
-	const auto library = "swds";
+	const auto library = "xash";
 #elif defined(PLATFORM_POSIX)
-	const auto library = "engine_i486";
+	const auto library = "xash";
 #endif
 
 	if (!GET_IFACE<IRehldsApi>(library, RehldsApi, VREHLDS_HLDS_API_VERSION) || !RehldsApi)
@@ -42,5 +39,4 @@ bool RehldsApi_Init()
 	RehldsSvs        = RehldsApi->GetServerStatic();
 
 	return true;
-	*/
 }
