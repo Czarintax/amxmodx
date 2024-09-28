@@ -611,6 +611,7 @@ static cell AMX_NATIVE_CALL show_hudmessage(AMX *amx, cell *params) /* 2 param *
 			{
 				g_langMngr.SetDefLang(i);
 				message = UTIL_SplitHudMessage(format_amxstring(amx, params, 2, len));
+				message = UTIL_StripColorSymbols(message);
 				if (aut)
 				{
 					channel = pPlayer->NextHUDChannel();
@@ -624,6 +625,7 @@ static cell AMX_NATIVE_CALL show_hudmessage(AMX *amx, cell *params) /* 2 param *
 		}
 	} else {
 		message = UTIL_SplitHudMessage(format_amxstring(amx, params, 2, len));
+		message = UTIL_StripColorSymbols(message);
 		int index = params[1];
 
 		if (index < 1 || index > gpGlobals->maxClients)
