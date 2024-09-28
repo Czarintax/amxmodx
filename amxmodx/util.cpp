@@ -182,11 +182,10 @@ char* UTIL_SplitHudMessage(const char *src)
 	return message;
 }
 
-// czarintax:function to remove colors from hud
+/* czarintax:function to remove colors from hud */
 char* UTIL_StripColorSymbols(const char *src)
 {
     static char message[512];
-	
     int j = 0;
     for (int i = 0; src[i] != '\0'; i++)
     {
