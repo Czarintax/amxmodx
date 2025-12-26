@@ -13,7 +13,10 @@ binary.compiler.defines += [
 ]
 
 if binary.compiler.cxx.name == 'gcc':
-  binary.compiler.cflags += ['-Wno-misleading-indentation']
+  binary.compiler.cflags += [
+    '-Wno-misleading-indentation',
+    '-Wno-error=return-local-addr',
+  ]
 
 if builder.target_platform == 'linux' or builder.target_platform == 'mac':
   binary.compiler.defines += ['stricmp=strcasecmp']
