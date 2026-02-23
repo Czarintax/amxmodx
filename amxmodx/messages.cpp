@@ -19,6 +19,7 @@ float *msgOrigin;
 edict_t *msgpEntity;
 bool inhook = false;
 bool inblock = false;
+static bool insend = false;
 enginefuncs_t *g_pEngTable = NULL;
 
 void ClearMessages()
@@ -204,6 +205,7 @@ void Message::Send()
 
 void C_MessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *ed)
 {
+        if (insend || inhook) RETURN_META(MRES_IGNORED);
 	if (msgBlocks[msg_type])
 	{
 		inblock = true;
@@ -223,6 +225,7 @@ void C_MessageBegin(int msg_dest, int msg_type, const float *pOrigin, edict_t *e
 
 void C_WriteByte(int iValue)
 {
+if (insend) RETURN_META(MRES_IGNORED);
 	if (inblock)
 	{
 		RETURN_META(MRES_SUPERCEDE);
@@ -237,6 +240,7 @@ void C_WriteByte(int iValue)
 void C_WriteChar(int iValue)
 {
 	if (inblock)
+if (insend) RETURN_META(MRES_IGNORED);
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	} else if (inhook) {
@@ -251,6 +255,7 @@ void C_WriteShort(int iValue)
 {
 	if (inblock)
 	{
+if (insend) RETURN_META(MRES_IGNORED);
 		RETURN_META(MRES_SUPERCEDE);
 	} else if (inhook) {
 		Msg.AddParam(iValue, arg_short);
@@ -265,6 +270,7 @@ void C_WriteLong(int iValue)
 	if (inblock)
 	{
 		RETURN_META(MRES_SUPERCEDE);
+if (insend) RETURN_META(MRES_IGNORED);
 	} else if (inhook) {
 		Msg.AddParam(iValue, arg_long);
 		RETURN_META(MRES_SUPERCEDE);
@@ -279,6 +285,7 @@ void C_WriteAngle(float flValue)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	} else if (inhook) {
+if (insend) RETURN_META(MRES_IGNORED);
 		Msg.AddParam(flValue, arg_angle);
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -293,6 +300,7 @@ void C_WriteCoord(float flValue)
 		RETURN_META(MRES_SUPERCEDE);
 	} else if (inhook) {
 		Msg.AddParam(flValue, arg_coord);
+if (insend) RETURN_META(MRES_IGNORED);
 		RETURN_META(MRES_SUPERCEDE);
 	}
 
@@ -307,6 +315,7 @@ void C_WriteString(const char *sz)
 	} else if (inhook) {
 		Msg.AddParam(sz, arg_string);
 		RETURN_META(MRES_SUPERCEDE);
+if (insend) RETURN_META(MRES_IGNORED);
 	}
 
 	RETURN_META(MRES_IGNORED);
@@ -321,12 +330,14 @@ void C_WriteEntity(int iValue)
 		Msg.AddParam(iValue, arg_entity);
 		RETURN_META(MRES_SUPERCEDE);
 	}
+if (insend) RETURN_META(MRES_IGNORED);
 
 	RETURN_META(MRES_IGNORED);
 }
 
 void C_MessageEnd(void)
 {
+        if (insend) RETURN_META(MRES_IGNORED);
 	int mres = 0;
 	
 	if (inblock)
@@ -349,17 +360,20 @@ void C_MessageEnd(void)
 						mres = mresB;
 		}
 		*/
-		inhook = false;
+		// inhook will be reset after message is sent
 		if (mres & 1)
 		{
 			Msg.Reset();
 			RETURN_META(MRES_SUPERCEDE);
 		}
+                insend = true;
 
 		/* send the real message */
 		MESSAGE_BEGIN(msgDest, msgType, msgOrigin, msgpEntity);
 		Msg.Send();
 		MESSAGE_END();
+                insend = false;
+		inhook = false;
 
 		/* reset */
 		Msg.Reset();
