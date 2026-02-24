@@ -349,6 +349,13 @@ void C_MessageEnd(void)
 						mres = mresB;
 		}
 		*/
+		
+		// Save message state before forwarding to prevent nesting issues
+		int saved_msgType = msgType;
+		int saved_msgDest = msgDest;
+		float *saved_msgOrigin = msgOrigin;
+		edict_t *saved_msgpEntity = msgpEntity;
+		
 		inhook = false;
 		if (mres & 1)
 		{
@@ -357,7 +364,7 @@ void C_MessageEnd(void)
 		}
 
 		/* send the real message */
-		MESSAGE_BEGIN(msgDest, msgType, msgOrigin, msgpEntity);
+		MESSAGE_BEGIN(saved_msgDest, saved_msgType, saved_msgOrigin, saved_msgpEntity);
 		Msg.Send();
 		MESSAGE_END();
 
