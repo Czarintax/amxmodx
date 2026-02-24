@@ -152,6 +152,13 @@ char* UTIL_SplitHudMessage(const char *src)
 
 	while (src[d] && e < 480)
 	{
+		// Strip Xash3D color codes (^0 through ^9)
+		if (src[d] == '^' && src[d + 1] >= '0' && src[d + 1] <= '9')
+		{
+			d += 2; // Skip the color code
+			continue;
+		}
+
 		if (src[d] == ' ')
 		{
 			c = e;
