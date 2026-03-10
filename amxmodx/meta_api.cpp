@@ -953,7 +953,13 @@ void C_ClientDisconnect(edict_t *pEntity)
 
 CPlayer* SV_DropClient_PreHook(edict_s *client, qboolean crash, const char *buffer, size_t buffer_size)
 {
-	auto pPlayer = client ? GET_PLAYER_POINTER(client) : nullptr;
+	// Validate edict pointer before calling ENTINDEX to prevent crash with corrupted pointers
+	CPlayer *pPlayer = nullptr;
+	
+	if (client && !FNullEnt(client))
+	{
+		pPlayer = GET_PLAYER_POINTER(client);
+	}
 
 	if (pPlayer)
 	{
