@@ -145,29 +145,18 @@ void UTIL_IntToString(int value, char *output)
 		sprintf(&output[aaa], "%s", words[unit]);
 }
 
-// Strip Xash3D color codes from a string
+// Strip Xash3D color codes from a string (^0 through ^9)
 void StripXashColorCodes(char *dest, const char *src, size_t maxlen)
 {
 	size_t d = 0, s = 0;
 	
 	while (src[s] && d < maxlen - 1)
 	{
-		// Check for Xash3D color codes
-		if (src[s] == '^')
+		// Check for Xash3D color codes ^0-^9
+		if (src[s] == '^' && src[s + 1] >= '0' && src[s + 1] <= '9')
 		{
-			// Check for ^0-^9 (basic colors)
-			if (src[s + 1] >= '0' && src[s + 1] <= '9')
-			{
-				s += 2; // Skip ^N
-				continue;
-			}
-			// Check for ^xRGB (extended RGB colors)
-			else if ((src[s + 1] == 'x' || src[s + 1] == 'X') &&
-			         isxdigit(src[s + 2]) && isxdigit(src[s + 3]) && isxdigit(src[s + 4]))
-			{
-				s += 5; // Skip ^xRGB
-				continue;
-			}
+			s += 2; // Skip ^N
+			continue;
 		}
 		
 		dest[d++] = src[s++];
@@ -183,22 +172,11 @@ char* UTIL_SplitHudMessage(const char *src)
 
 	while (src[d] && e < 480)
 	{
-		// Strip Xash3D color codes
-		if (src[d] == '^')
+		// Strip Xash3D color codes ^0-^9
+		if (src[d] == '^' && src[d + 1] >= '0' && src[d + 1] <= '9')
 		{
-			// Check for ^0-^9 (basic colors)
-			if (src[d + 1] >= '0' && src[d + 1] <= '9')
-			{
-				d += 2; // Skip ^N
-				continue;
-			}
-			// Check for ^xRGB (extended RGB colors)
-			else if ((src[d + 1] == 'x' || src[d + 1] == 'X') &&
-			         isxdigit(src[d + 2]) && isxdigit(src[d + 3]) && isxdigit(src[d + 4]))
-			{
-				d += 5; // Skip ^xRGB
-				continue;
-			}
+			d += 2; // Skip ^N
+			continue;
 		}
 
 		if (src[d] == ' ')
