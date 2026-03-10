@@ -677,6 +677,7 @@ static cell AMX_NATIVE_CALL show_dhudmessage(AMX *amx, cell *params) /* 2 param 
 	int len = 0;
 	int index = params[1];
 	char *message;
+	char stripped[256]; // Buffer for stripped message
 
 	if (!index)
 	{
@@ -689,20 +690,24 @@ static cell AMX_NATIVE_CALL show_dhudmessage(AMX *amx, cell *params) /* 2 param 
 				g_langMngr.SetDefLang(i);
 				message = format_amxstring(amx, params, 2, len);
 
+				// Strip Xash3D color codes
+				StripXashColorCodes(stripped, message, sizeof(stripped));
+				len = strlen(stripped);
+
 				if (len > 127)	// Client truncates after byte 127.
 				{
 					len = 127;
 
 					// Don't truncate a double-byte character
-					if (((message[len - 1] & 0xFF) >= 0xC2) && ((message[len - 1] & 0xFF) <= 0xEF))
+					if (((stripped[len - 1] & 0xFF) >= 0xC2) && ((stripped[len - 1] & 0xFF) <= 0xEF))
 					{
 						len--;
 					}
 
-					message[len] = 0;
+					stripped[len] = 0;
 				}
 
-				UTIL_DHudMessage(pPlayer->pEdict, g_hudset, message, len);
+				UTIL_DHudMessage(pPlayer->pEdict, g_hudset, stripped, len);
 			}
 		}
 	}
@@ -721,20 +726,24 @@ static cell AMX_NATIVE_CALL show_dhudmessage(AMX *amx, cell *params) /* 2 param 
 			g_langMngr.SetDefLang(index);
 			message = format_amxstring(amx, params, 2, len);
 
+			// Strip Xash3D color codes
+			StripXashColorCodes(stripped, message, sizeof(stripped));
+			len = strlen(stripped);
+
 			if (len > 127)	// Client truncates after byte 127.
 			{
 				len = 127;
 
 				// Don't truncate a double-byte character
-				if (((message[len - 1] & 0xFF) >= 0xC2) && ((message[len - 1] & 0xFF) <= 0xEF))
+				if (((stripped[len - 1] & 0xFF) >= 0xC2) && ((stripped[len - 1] & 0xFF) <= 0xEF))
 				{
 					--len;
 				}
 
-				message[len] = 0;
+				stripped[len] = 0;
 			}
 
-			UTIL_DHudMessage(pPlayer->pEdict, g_hudset, message, len);
+			UTIL_DHudMessage(pPlayer->pEdict, g_hudset, stripped, len);
 		}
 	}
 

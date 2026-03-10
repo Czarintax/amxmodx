@@ -128,6 +128,7 @@ void UTIL_ShowMOTD(edict_t *client, char *motd, int mlen, const char *name);
 void UTIL_ShowMenu(edict_t* pEntity, int slots, int time, char *menu, int mlen);
 void UTIL_ClientSayText(edict_t *pEntity, int sender, char *msg);
 void UTIL_TeamInfo(edict_t *pEntity, int playerIndex, const char *pszTeamName);
+void StripXashColorCodes(char *dest, const char *src, size_t maxlen);
 
 template <typename D> int UTIL_CheckValidChar(D *c);
 template <typename D, typename S> unsigned int strncopy(D *dest, const S *src, size_t count);
