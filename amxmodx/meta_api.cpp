@@ -959,6 +959,22 @@ CPlayer* SV_DropClient_PreHook(edict_s *client, qboolean crash, const char *buff
 	if (client && !FNullEnt(client))
 	{
 		pPlayer = GET_PLAYER_POINTER(client);
+		
+		// Additional validation: ensure pPlayer is within valid range and not corrupted
+		if (pPlayer)
+		{
+			int playerIndex = pPlayer->index;
+			if (playerIndex < 1 || playerIndex > gpGlobals->maxClients)
+			{
+				// Invalid index - CPlayer object is corrupted
+				pPlayer = nullptr;
+			}
+			else if (pPlayer != GET_PLAYER_POINTER_I(playerIndex))
+			{
+				// Pointer mismatch - corrupted
+				pPlayer = nullptr;
+			}
+		}
 	}
 
 	if (pPlayer)
@@ -977,6 +993,22 @@ void SV_DropClient_PostHook(CPlayer *pPlayer, qboolean crash, const char *buffer
 {
 	if (pPlayer)
 	{
+		// Validate pPlayer is within valid range before accessing members
+		// Xash3D can pass corrupted pointers during timeout handling
+		int playerIndex = pPlayer->index;
+		if (playerIndex < 1 || playerIndex > gpGlobals->maxClients)
+		{
+			// Invalid player index - pointer is corrupted, skip cleanup
+			return;
+		}
+		
+		// Additional safety: check if this is actually our CPlayer object
+		if (pPlayer != GET_PLAYER_POINTER_I(playerIndex))
+		{
+			// Pointer mismatch - corrupted, skip cleanup
+			return;
+		}
+		
 		pPlayer->Disconnect();
 		executeForwards(FF_ClientRemove, pPlayer->index, TRUE, buffer);
 	}
