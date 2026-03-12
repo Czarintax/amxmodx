@@ -953,37 +953,56 @@ void C_ClientDisconnect(edict_t *pEntity)
 
 CPlayer* SV_DropClient_PreHook(edict_s *client, qboolean crash, const char *buffer, size_t buffer_size)
 {
-	// Validate edict pointer before calling ENTINDEX to prevent crash with corrupted pointers
+	// Xash3D can pass invalid pointers during connection floods - validate before any access
 	CPlayer *pPlayer = nullptr;
 	
-	if (client && !FNullEnt(client))
+	if (!client)
 	{
-		pPlayer = GET_PLAYER_POINTER(client);
-		
-		// Additional validation: ensure pPlayer is within valid range and not corrupted
-		if (pPlayer)
+		return nullptr;
+	}
+	
+	// Use engine function to safely get edict by index instead of pointer arithmetic
+	// This avoids dereferencing potentially invalid pointers
+	int clientIndex = -1;
+	
+	// Try to find which index this edict corresponds to by checking all player slots
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		edict_t *ent = g_engfuncs.pfnPEntityOfEntIndex(i);
+		if (ent == client)
 		{
-			int playerIndex = pPlayer->index;
-			if (playerIndex < 1 || playerIndex > gpGlobals->maxClients)
-			{
-				// Invalid index - CPlayer object is corrupted
-				pPlayer = nullptr;
-			}
-			else if (pPlayer != GET_PLAYER_POINTER_I(playerIndex))
-			{
-				// Pointer mismatch - corrupted
-				pPlayer = nullptr;
-			}
+			clientIndex = i;
+			break;
+		}
+	}
+	
+	// If we couldn't find this edict in valid player slots, it's invalid
+	if (clientIndex == -1)
+	{
+		return nullptr;
+	}
+	
+	// Now safe to check if edict is null
+	if (FNullEnt(client))
+	{
+		return nullptr;
+	}
+	
+	pPlayer = GET_PLAYER_POINTER_I(clientIndex);
+	
+	// Validate CPlayer object
+	if (pPlayer)
+	{
+		if (pPlayer->index != clientIndex || !pPlayer->initialized)
+		{
+			pPlayer = nullptr;
 		}
 	}
 
 	if (pPlayer)
 	{
-		if (pPlayer->initialized)
-		{
-			pPlayer->disconnecting = true;
-			executeForwards(FF_ClientDisconnected, pPlayer->index, TRUE, prepareCharArray(const_cast<char*>(buffer), buffer_size, true), buffer_size - 1);
-		}
+		pPlayer->disconnecting = true;
+		executeForwards(FF_ClientDisconnected, pPlayer->index, TRUE, prepareCharArray(const_cast<char*>(buffer), buffer_size, true), buffer_size - 1);
 	}
 
 	return pPlayer;
@@ -991,27 +1010,35 @@ CPlayer* SV_DropClient_PreHook(edict_s *client, qboolean crash, const char *buff
 
 void SV_DropClient_PostHook(CPlayer *pPlayer, qboolean crash, const char *buffer)
 {
-	if (pPlayer)
+	if (!pPlayer)
 	{
-		// Validate pPlayer is within valid range before accessing members
-		// Xash3D can pass corrupted pointers during timeout handling
-		int playerIndex = pPlayer->index;
-		if (playerIndex < 1 || playerIndex > gpGlobals->maxClients)
-		{
-			// Invalid player index - pointer is corrupted, skip cleanup
-			return;
-		}
-		
-		// Additional safety: check if this is actually our CPlayer object
-		if (pPlayer != GET_PLAYER_POINTER_I(playerIndex))
-		{
-			// Pointer mismatch - corrupted, skip cleanup
-			return;
-		}
-		
-		pPlayer->Disconnect();
-		executeForwards(FF_ClientRemove, pPlayer->index, TRUE, buffer);
+		return;
 	}
+	
+	// Validate pPlayer is actually one of our CPlayer objects before accessing members
+	// Check all player slots to see if this pointer matches
+	bool isValid = false;
+	int validIndex = -1;
+	
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CPlayer *validPlayer = GET_PLAYER_POINTER_I(i);
+		if (validPlayer == pPlayer)
+		{
+			isValid = true;
+			validIndex = i;
+			break;
+		}
+	}
+	
+	if (!isValid)
+	{
+		return;
+	}
+	
+	// Now safe to access pPlayer members
+	pPlayer->Disconnect();
+	executeForwards(FF_ClientRemove, validIndex, TRUE, buffer);
 }
 
 // Xash3D version: void SV_DropClient(sv_client_t *cl, qboolean crash)
